@@ -5,15 +5,8 @@
 // (display an error if the connection fails)
 $conn = mysqli_connect('localhost', 'Admin', 'F8eGy7WtY3HScSnU') or die(mysqli_error());
 mysqli_select_db($conn, 'logintest') or die(mysqli_error());
-
-//This is supposed to start a session
-//session_start();
-//session_destroy();
-//$test_session = "This is a variable session";
-//session_start("test_session");
-
-
 ?>
+<?php session_start(); ?>
 
 <html>
 
@@ -56,11 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // We don't care what the result is
     // If there is one, that means the username is taken
     if ($user_results) {
-		//stuff for session maybe
-		//echo "<?" . 
-		//"session_start();" . 
-		//"$test_session = 'This is a variable session';" .
-		//"session_start('test_session');" . 
+		$_SESSION['loggedin']=TRUE;
 		header( "location: /wwiidatabase/WWII.php" );
 	
     }
