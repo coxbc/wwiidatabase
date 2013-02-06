@@ -1,4 +1,13 @@
 <!DOCTYPE html>
+<?php
+
+session_start();
+if ($_SESSION['loggedin'] !== TRUE) {
+   header("Location: /wwiidatabase/Login.php");
+   echo 'You must log in first';
+   exit();
+}
+?>
 <html>
 <head>
 
