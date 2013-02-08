@@ -1,23 +1,50 @@
 <!DOCTYPE html>
 
 <?php
-// Open a connection to the database
-// (display an error if the connection fails)
-$conn = mysqli_connect('localhost', 'Admin', 'F8eGy7WtY3HScSnU') or die(mysqli_error());
-mysqli_select_db($conn, 'logintest') or die(mysqli_error());
+$server = 'whale.csse.rose-hulman.edu';
+
+// Connect to MSSQL
+$link = odbc_connect("Driver={SQL Server Native Client 10.0};Server=whale.csse.rose-hulman.edu;Database=Nadine_WWII", 'coxbc', 'whales');
+
+if (!$link) {
+    die('Something went wrong while connecting to MSSQL');
+}
 ?>
 <?php session_start(); ?>
+<?php
+  $bg = array('/BG1.jpg', '/BG2.jpg', '/BG3.jpg', '/BG4.jpg', '/BG5.jpg', '/BG6.jpg', '/BG7.jpg', '/BG8.jpg', '/BG9.jpg', '/BG10.jpg'); // array of filenames
+
+  $i = rand(0, count($bg)-1); // generate random number size of the array
+  $selectedBg = "$bg[$i]"; // set variable equal to which random filename was chosen
+
+?>
 
 <html>
+<style type="text/css">
+body { 
+background: url(<?php echo $selectedBg; ?>) no-repeat center center fixed;
+-moz-background-size: cover;
+-webkit-background-size: cover;
+-o-background-size: cover;
+background-size: cover;
+}
+.box_textshadow {
+     text-shadow: 3px 2px 0px #000000; /* FF3.5+, Opera 9+, Saf1+, Chrome, IE10 */
+}
+a:hover {
+  color: black ;
+  background-color: #ff0 ;
+}
+</style>
 
 
-<html>
 <head>
 <title>Login</title>
 </head>
 <body>
+<!--img src="/BG1.jpg" /-->
 
-<h1>Login Test!</h1>
+<h1 class="box_textshadow" style="font: 35px"><font color = "FFFFFF">Login</font></h1>
 <?php
 // Only execute if we're receiving a post
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -28,13 +55,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Make sure the username field is filled
     $username = $_POST['username'];
-    $username = mysqli_real_escape_string($conn, $username);
     $username = htmlspecialchars($username, ENT_COMPAT | ENT_HTML401);
     if (empty($username)) $errors .= '<li>Username is required</li>';
 
     // Make sure the password field is filled
     $password = $_POST['password'];
-    $password = mysqli_real_escape_string($conn, $password);
     $password = htmlspecialchars($password, ENT_COMPAT | ENT_HTML401);
     if (empty($password)) $errors .= '<li>Password is required</li>';
 
@@ -43,29 +68,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         echo '<ul>' . $errors . '</ul>';
 
     // Otherwise, begin the user creation process
-    } else {
-     // First, check for that username already being taken
-    $user_results = mysqli_query($conn, "SELECT * FROM users WHERE Username = '" . $username . "'");
+    } else {	
+	$data = odbc_exec($link, "SELECT * FROM Users WHERE Username = '" . $username . "' AND Password = '" . sha1("'" . $username . $password . "'") . "'");
+			
     // We don't care what the result is
     // If there is one, that means the username is taken
-    if ($user_results) {
+	//Hash
+    if (odbc_fetch_row($data)) {
 		$_SESSION['loggedin']=TRUE;
-		header( "location: /wwiidatabase/WWII.php" );
+		header( "location: /WWII.php" );
 	
-    }
+    }else{
+		echo '<strong><font size="5" color="#FF0000">Login unsuccessful</font></strong><br /><br />';
+	}
 
     }
 }
 ?>
 
 <form action="" method="post">
-	<label for="username">Username</label><br/>
-	<input type="text" name="username"/><br/>
-	<label for="username">Password</label><br/>
-	<input type="password" name="password"/><br/>
-    <input type="submit" value="Login"/><br/>
+	<label for="username" style="font-size:30px"><strong class="box_textshadow"><font color = "FFFFFF">Username</font></strong></label><br/>
+	<input type="text" style="width:200px; height: 25px;" name="username"/><br/>
+	<label for="username" style="font-size:30px"><strong class="box_textshadow"><font color = "FFFFFF">Password</font></strong></label><br/>
+	<input type="password" style="width:200px;  height: 25px;" name="password"/><br/><br />
+    <input type="submit" style="width:100px; height: 40px;" value="Login"/><br/>
 </form>
-<a href="/wwiidatabase/Register.php" style="float:right">New User?</a>
+<a href="/Register.php" style="float:right; font-size:20px"><strong>New User?</strong></a>
 
 
 
